@@ -1,6 +1,26 @@
 Use within the Next-Gen SIEM Advanced event Search
 ```
 "#event_simpleName" = DnsRequest
+
+//Filter by computername
+| ComputerName = ?ComputerName
+
+//filter out any common private IPs
+| !cidr(IP4Records, subnet=["224.0.0.0/4", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/32", "169.254.0.0/16", "0.0.0.0/32"])
+| !cidr(FirstIP4Record, subnet=["224.0.0.0/4", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/32", "169.254.0.0/16", "0.0.0.0/32"])
+
+//filter out known domains
+| !in(field="DomainName", values=[])
+
+//make it appear as basic table
+| groupBy([DomainName], function=collect([FirstIP4Record,IP4Records]))
+```
+
+
+
+Below I've added some common filters for my searches.
+```
+"#event_simpleName" = DnsRequest
 | ComputerName = ?ComputerName
 | !cidr(IP4Records, subnet=["224.0.0.0/4", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/32", "169.254.0.0/16", "0.0.0.0/32"])
 | !cidr(FirstIP4Record, subnet=["224.0.0.0/4", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/32", "169.254.0.0/16", "0.0.0.0/32"])
